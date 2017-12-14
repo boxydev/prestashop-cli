@@ -46,7 +46,7 @@ class PrestashopInstallCommand extends Command
             $output->writeln("<info>Downloading Prestashop...</info>");
 
             $client = new Client();
-            $request = $client->request(
+            $client->request(
                 'GET',
                 'https://www.prestashop.com/download/old/prestashop_1.7.2.4.zip',
                 [
@@ -100,9 +100,12 @@ class PrestashopInstallCommand extends Command
             });
 
             $this->progressBar = new ProgressBar($this->output, $downloadSize);
-            $this->progressBar->setFormat('%current%/%max% [%bar%]  %percent:3s%%');
+            $this->progressBar->setFormat('%current%/%max% %bar%  %percent:3s%%');
 
-            $this->progressBar->setProgressCharacter("\xF0\x9F\x8D\xBA");
+            // $this->progressBar->setProgressCharacter("\xF0\x9F\x8D\xBA");
+            $this->progressBar->setEmptyBarCharacter('░');
+            $this->progressBar->setProgressCharacter('');
+            $this->progressBar->setBarCharacter('▓');
 
             $this->progressBar->start();
         }
