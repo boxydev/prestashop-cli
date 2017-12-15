@@ -45,8 +45,15 @@ class PrestashopInstallCommand extends Command
             $psVersion = $helper->ask($input, $output, $askVersion);
         }
 
-        if (!file_exists(Application::ROOT_DIR.'prestashop.zip')) {
-            $output->writeln("<info>Downloading Prestashop...</info>");
+        $zipPrestashop = realpath(Application::ROOT_DIR).'/prestashop_'.$psVersion.'.zip';
+        $destination = realpath(Application::ROOT_DIR).'/prestashop';
+
+        if (file_exists($zipPrestashop)) {
+            $output->writeln("<info>Prestashop ".$psVersion." already downloaded.</info>");
+        }
+
+        if (!file_exists($zipPrestashop)) {
+            $output->writeln("<info>Downloading Prestashop ".$psVersion."...</info>");
 
             $client = new Client();
             $progressBar = null;
@@ -54,7 +61,7 @@ class PrestashopInstallCommand extends Command
                 'GET',
                 'https://www.prestashop.com/download/old/prestashop_'.$psVersion.'.zip',
                 [
-                    'progress' => function ($downloadSize, $downloaded) use (&$output, &$progressBar) {
+                    'progress' => function ($downloadSize, $downloaded) use (&$output, &$progressBar, $psVersion) {
                         if ($downloadSize < 1 * 1024 * 1024) {
                             return;
                         }
@@ -81,7 +88,7 @@ class PrestashopInstallCommand extends Command
 
                         $progressBar->setProgress($downloaded);
                     },
-                    'sink' => Application::ROOT_DIR.'prestashop.zip'
+                    'sink' => $zipPrestashop
                 ]
             );
 
@@ -92,26 +99,48 @@ class PrestashopInstallCommand extends Command
             $output->writeln("\n");
         }
 
-        $output->writeln("<info>Extracting Prestashop...</info>");
+        $output->writeln("<info>Extracting Prestashop ".$psVersion."...</info>");
 
         $zip = new \ZipArchive();
 
-        if (true !== $zip->open(Application::ROOT_DIR.'prestashop.zip')) {
-            $output->writeln("<error>Unable to unzip ".Application::ROOT_DIR."prestashop.zip</error>");
+        if (true !== $zip->open($zipPrestashop)) {
+            $output->writeln("<error>Unable to unzip ".$zipPrestashop."</error>");
             return;
         }
 
-        $zip->extractTo(Application::ROOT_DIR.'prestashop');
+        // Unzip strategy for 1.6
+        if (version_compare($psVersion, '1.7', '<=')) {
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $filename = $zip->getNameIndex($i);
 
+                if ('Install_PrestaShop.html' !== $filename) {
+                    $zip->extractTo($destination, $filename);
+                }
+            }
+        }
+
+        // Unzip strategy for 1.7 because distribution zip contains a zip
         if (version_compare($psVersion, '1.7', '>=')) {
-            if (true !== $zip->open(Application::ROOT_DIR.'prestashop/prestashop.zip')) {
-                $output->writeln("<error>Unable to unzip ".Application::ROOT_DIR."prestashop.zip</error>");
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $filename = $zip->getNameIndex($i);
+
+                if ('prestashop.zip' === $filename) {
+                    $zip->extractTo($destination, $filename);
+                }
+            }
+
+            if (true !== $zip->open($destination.'/prestashop.zip')) {
+                $output->writeln("<error>Unable to unzip ".$zipPrestashop."</error>");
                 return;
             }
 
-            $zip->extractTo(Application::ROOT_DIR.'prestashop');
+            $zip->extractTo($destination);
+
+            unlink($destination.'/prestashop.zip');
         }
 
-        $output->writeln("<info>Prestashop is installed !</info>");
+        $zip->close();
+
+        $output->writeln("<info>Prestashop ".$psVersion." is now installed at ".$destination." !</info>");
     }
 }
