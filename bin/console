@@ -8,7 +8,7 @@ if (!file_exists(__DIR__.'/../vendor/autoload.php')) {
 
 require __DIR__.'/../vendor/autoload.php';
 
-$app = new Boxydev\Prestashop\Application();
+$app = new Boxydev\Prestashop\Application('Prestashop Console', '0.1.0');
 $app->addCommands([
     new Boxydev\Prestashop\Command\PrestashopInstallCommand()
 ]);
