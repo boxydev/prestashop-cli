@@ -27,7 +27,7 @@ class PrestashopInstallCommandTest extends TestCase
         $commandTester = new CommandTester($command);
         $commandTester->execute(array(
             'command'  => $command->getName(),
-            '--psVersion' => '1.7.2.4'
+            'directory' => 'prestashop'
         ));
 
         $output = $commandTester->getDisplay();
