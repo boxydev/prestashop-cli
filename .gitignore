@@ -1,3 +1,4 @@
-/tests/fixtures/
+!/tests/fixtures
+/tests/fixtures/*
 !/tests/fixtures/.gitkeep
 /vendor/
