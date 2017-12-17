@@ -32,6 +32,11 @@ class PrestashopInstallCommand extends Command
      */
     private $zip;
 
+    /**
+     * @var Client
+     */
+    private $client;
+
     protected function configure()
     {
         $this->setName('prestashop:install')
@@ -43,13 +48,33 @@ class PrestashopInstallCommand extends Command
 
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
-        $this->fs = new Filesystem();
-
         if (!class_exists('ZipArchive')) {
             throw new \Exception('You must enable zip extension in php.ini.');
         }
 
-        $this->zip = new \ZipArchive();
+        $this->fs = new Filesystem();
+        $this->client = (null === $this->client) ? new Client() : $this->client;
+        $this->zip = (null === $this->zip) ? new \ZipArchive() : $this->zip;
+    }
+
+    public function setClient(Client $client)
+    {
+        $this->client = $client;
+    }
+
+    public function getClient()
+    {
+        return $this->client;
+    }
+
+    public function setZip(\ZipArchive $zip)
+    {
+        $this->zip = $zip;
+    }
+
+    public function getZip()
+    {
+        return $this->zip;
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
@@ -79,9 +104,8 @@ class PrestashopInstallCommand extends Command
 
         $this->fs->mkdir($psDirectory);
 
-        $client = new Client();
         $progressBar = null;
-        $client->request(
+        $this->client->request(
             'GET',
             'https://www.prestashop.com/download/old/prestashop_'.$version.'.zip',
             [
@@ -122,7 +146,6 @@ class PrestashopInstallCommand extends Command
 
         $output->writeln("\n");
 
-
         $output->writeln("<info>Extracting Prestashop ".$version."...</info>");
 
         if (true !== $this->zip->open($zipPrestashop)) {
@@ -131,7 +154,7 @@ class PrestashopInstallCommand extends Command
         }
 
         // Unzip strategy for 1.6
-        if (version_compare($version, '1.6', '<=')) {
+        if (version_compare($version, '1.7', '<=')) {
             for ($i = 0; $i < $this->zip->numFiles; $i++) {
                 $filename = $this->zip->getNameIndex($i);
 
