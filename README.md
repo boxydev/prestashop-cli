@@ -1,10 +1,11 @@
 # Prestashop Console
 
-I like tooling in Symfony or modern PHP framework who can improve DX.
-With this tool, maybe I can retrieve the same DX in Prestashop like Symfony...
+We like tooling in Symfony or modern PHP framework who can improve DX.
+With this tool, maybe we can retrieve the same DX in Prestashop like Symfony...
 
 ## Usage
 
+You need to enable PHP Zip extension.
 Tool is in development at the moment but we can launch the first command :
 
 ```

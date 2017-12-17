@@ -36,8 +36,9 @@ class PrestashopInstallCommandTest extends TestCase
         $prestashop16zip = Psr7\stream_for(fopen(__DIR__.'/../fixtures/prestashop_1.6.1.17.zip', 'r'));
 
         $mock = new MockHandler([
+            new Response(200, [], $prestashop16zip),
             new Response(200, [], $prestashop17zip),
-            new Response(200, [], $prestashop16zip)
+            new Response(200, [], $prestashop17zip)
         ]);
         $handler = HandlerStack::create($mock);
         self::$client = new Client(['handler' => $handler]);
@@ -114,6 +115,30 @@ class PrestashopInstallCommandTest extends TestCase
         $prestashopInstallCommand->setClient(self::$client);
         $zip = $this->getMockBuilder('ZipArchive')->getMock();
         $zip->method('open')->will($this->returnValue(false));
+        $prestashopInstallCommand->setZip($zip);
+        $application->add($prestashopInstallCommand);
+
+        $command = $application->find('prestashop:install');
+
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(array(
+            'command'  => $command->getName(),
+            'directory' => 'testDIR'
+        ));
+
+        $output = $commandTester->getDisplay();
+        $this->assertContains('Unable to unzip', $output);
+    }
+
+    public function testIfZipIsNotCorrectFor17()
+    {
+        $application = new Application();
+        $prestashopInstallCommand = new PrestashopInstallCommand();
+        $prestashopInstallCommand->setClient(self::$client);
+        $zip = $this->getMockBuilder('ZipArchive')->getMock();
+        $zip->expects($this->exactly(2))
+            ->method('open')
+            ->will($this->onConsecutiveCalls(true, false));
         $prestashopInstallCommand->setZip($zip);
         $application->add($prestashopInstallCommand);
 

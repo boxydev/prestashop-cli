@@ -48,10 +48,6 @@ class PrestashopInstallCommand extends Command
 
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
-        if (!class_exists('ZipArchive')) {
-            throw new \Exception('You must enable zip extension in php.ini.');
-        }
-
         $this->fs = new Filesystem();
         $this->client = (null === $this->client) ? new Client() : $this->client;
         $this->zip = (null === $this->zip) ? new \ZipArchive() : $this->zip;
