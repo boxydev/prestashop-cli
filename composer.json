@@ -1,5 +1,5 @@
 {
-    "name": "boxydev/prestashopconsole",
+    "name": "boxydev/prestashop-console",
     "description": "CLI tool to install/manage Prestashop.",
     "license": "MIT",
     "authors": [
