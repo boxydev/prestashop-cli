@@ -1,4 +1,4 @@
-# Prestashop Console
+# Prestashop CLI
 
 We like tooling in Symfony or modern PHP framework who can improve DX.
 With this tool, maybe we can retrieve the same DX in Prestashop like Symfony...
